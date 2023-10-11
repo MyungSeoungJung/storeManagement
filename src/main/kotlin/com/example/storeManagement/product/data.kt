@@ -32,3 +32,13 @@ data class ProductWithFiles(
         var productDescription : String,
         val file: List<ProductFile>
 )
+data class ProductMessageRequest(
+        val id : Long,
+        val productBrand: String,
+        val productName: String,
+        val productPrice: String,
+        val productCode: String,
+        val category: String,
+        val productDescription: String,
+        val imageByteArrayList: List<ByteArray>
+)

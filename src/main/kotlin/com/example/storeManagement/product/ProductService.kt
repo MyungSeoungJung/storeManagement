@@ -1,6 +1,6 @@
 package com.example.storeManagement.product
 
-import ProductInfo
+import ProductMessageRequest
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.springframework.amqp.rabbit.core.RabbitTemplate
 import org.springframework.stereotype.Service
@@ -9,20 +9,15 @@ import org.springframework.stereotype.Service
 class ProductService (private val rabbitTemplate: RabbitTemplate) {
     private val mapper = jacksonObjectMapper()
 
-    fun createProductMessage(registrationRequest : ProductInfo){
-        registrationRequest.id = 1
-        for ((index,item) in registrationRequest.product.withIndex()) {
-            item.id = (index + 1).toLong()
-
-            sendMessage(registrationRequest)
-        }
+    fun createProductMessage(productMessageRequest: ProductMessageRequest) {
+        for ((index, item) in productMessageRequest.imageByteArrayList.withIndex())
+        sendMessage(productMessageRequest)
     }
 
-
-    fun sendMessage(registrationRequest: ProductInfo){
-        rabbitTemplate.convertAndSend("product-register", mapper.writeValueAsString(registrationRequest))
-//        rabbitTemplate클래스의 convertAndSend()로 메세지전송
+    fun sendMessage(productMessageRequest: ProductMessageRequest) {
+        rabbitTemplate.convertAndSend("product-register", mapper.writeValueAsString(productMessageRequest))
     }
-
-
 }
+
+
+

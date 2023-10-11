@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration
 
 object Product : Table("product"){
     val id = long("id").autoIncrement()
+    val productBrand = varchar("product_brand", 20)
     val productName = varchar("product_name", 20)
     val productPrice = long("product_price")
     val productCode = varchar("product_code",10)
@@ -21,7 +22,7 @@ object Product : Table("product"){
 object ProductFiles : LongIdTable("product_file"){
     val productId = reference("product_id", Product.id)
     val originalFileName = varchar("original_file_name", 200)
-    val uuidFileName = varchar("uuid", 50).uniqueIndex()
+    val uuidFileName = varchar("uuid", 100).uniqueIndex()
     val contentType = varchar("content_type", 100)
 }
 
