@@ -10,7 +10,6 @@ class ProductService (private val rabbitTemplate: RabbitTemplate) {
     private val mapper = jacksonObjectMapper()
 
     fun createProductMessage(productMessageRequest: ProductMessageRequest) {
-        for ((index, item) in productMessageRequest.imageByteArrayList.withIndex())
         sendMessage(productMessageRequest)
     }
 

@@ -1,14 +1,17 @@
 package com.example.storeManagement.product
 
 import ProductMessageRequest
-import com.example.storeManagement.product.Product.productName
+import RegisterResponse
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.exposed.sql.batchInsert
 import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
@@ -16,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
+import java.time.LocalDateTime
 import java.util.*
 
 @RestController
@@ -23,18 +27,23 @@ import java.util.*
 class ProductController(private val productService : ProductService) {
     private val POST_FILE_PATH = "files/productImg";
 
-    @PostMapping("/saveProduct")
+    @PostMapping("/registerProduct")   //상품 등록
     fun saveProduct(
         @RequestParam productBrand : String,
         @RequestParam productName : String,
         @RequestParam productPrice : Long,
-        @RequestParam productCode : String,
         @RequestParam category : String,
+        @RequestParam isActive : Boolean,
         @RequestParam productDescription : String,
         @RequestParam files: Array<MultipartFile>,
-    ) {
-
-        println(files)
+    ):ResponseEntity<RegisterResponse> {
+        println("productBrand :$productBrand")
+        println("productName : $productName")
+        println("productPrice : $productPrice")
+        println("category : $category")
+        println("isActive : $isActive")
+        println("productDescription : $productDescription")
+        println("이미지 파일: $files")
             val dirPath = Paths.get(POST_FILE_PATH)  //경로 생성
             if (!Files.exists(dirPath)) {
                 Files.createDirectories(dirPath)
@@ -42,14 +51,14 @@ class ProductController(private val productService : ProductService) {
 
             val fileList = mutableListOf<Map<String,String?>>() //변경 가능한 리스트 생성
             val imageByteArrayList = mutableListOf<ByteArray>()
-
+            //file처리 로직
             runBlocking { // 코루틴
                 files.forEach { // 각각 파일 병렬
                     launch {
                         println("filename: ${it.originalFilename}")
 
                         val uuidFileName = buildString {
-                            append(UUID.randomUUID().toString())
+                            append(UUID.randomUUID().toString())  //"Universally Unique Identifier" 중복방지,고유한 식별자 필요성 , 보안
                             append(".")
                             append(it.originalFilename)!!.split(".").last()
                         }
@@ -58,8 +67,9 @@ class ProductController(private val productService : ProductService) {
 
                         it.inputStream.use { inputStream ->
                             val bytes = inputStream.readBytes()
-                            imageByteArrayList.add(bytes)
+
                             Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING)
+                            imageByteArrayList.add(bytes) // 이미지 파일의 바이트 배열을 리스트에 추가
                         }
 
                         fileList.add(mapOf("uuidFileName" to uuidFileName,
@@ -68,16 +78,19 @@ class ProductController(private val productService : ProductService) {
                     }
                 }
             }
+        
+//       데이터베이스 처리 로직
         val result = transaction {
             val p = Product
             val pf = ProductFiles
+            val pi = ProductInventory
 
             val insertProduct = p.insert {
-            it[this.productBrand] = productBrand
             it[this.productName] = productName
+            it[this.productBrand] = productBrand
             it[this.productPrice] = productPrice
-            it[this.productCode] = productCode
             it[this.category] = category
+            it[this.isActive] = isActive
             it[this.productDescription] = productDescription
             }
             pf.batchInsert(fileList) {
@@ -86,24 +99,41 @@ class ProductController(private val productService : ProductService) {
             this[pf.uuidFileName] = it["uuidFileName"] as String
             this[pf.contentType] = it["contentType"] as String
             }
+            pi.insert {
+                it[productId] = insertProduct[p.id]
+                it[quantity] = 10  //초기 수량 -> 재고등록에서 수량 등록하게끔 / 재고 미등록 상품 띄우기
+                it[lastUpdated] = LocalDateTime.now()
+            }
 
+            // queue 전송 로직
             val productMessageRequest = ProductMessageRequest(
-                id = 1,
+                id = 1,   //인터셉터 들어오면 인터셉터된 profile의 id 삽입
                 productBrand = productBrand,
                 productName = productName,
                 productPrice = productPrice.toString(),
-                productCode = productCode,
+                isActive = isActive,
                 category = category,
                 productDescription = productDescription,
                 imageByteArrayList = imageByteArrayList
             )
+
+
+        //상품등록 queue 전송
         productService.createProductMessage(productMessageRequest)
+
+            return@transaction RegisterResponse(
+                productName = productName,
+                productPrice = productPrice
+            )
         }  // transction
 
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
-//    @PostMapping ("/register")
-//    fun productRegisterService(@RequestBody registrationRequest : ProductInfo ){
-//        productService.createProductMessage(registrationRequest)
+//    @GetMapping("/inventory")
+//    fun inventoryManagement(){
+//        val productList = mutableListOf<Map<String,String>>()
+//
 //    }
+
 }
