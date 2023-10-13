@@ -1,20 +1,15 @@
 package com.example.storeManagement.product
 
-import ProductMessageRequest
-import RegisterResponse
+import com.example.storeManagement.auth.Auth
+import com.example.storeManagement.auth.AuthProfile
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.exposed.sql.batchInsert
 import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -27,16 +22,20 @@ import java.util.*
 class ProductController(private val productService : ProductService) {
     private val POST_FILE_PATH = "files/productImg";
 
+    @Auth
     @PostMapping("/registerProduct")   //상품 등록
     fun saveProduct(
-        @RequestParam productBrand : String,
-        @RequestParam productName : String,
-        @RequestParam productPrice : Long,
-        @RequestParam category : String,
-        @RequestParam isActive : Boolean,
-        @RequestParam productDescription : String,
-        @RequestParam files: Array<MultipartFile>,
+            @RequestAttribute authProfile: AuthProfile,
+            @RequestParam productBrand : String,
+            @RequestParam productName : String,
+            @RequestParam productPrice : Long,
+            @RequestParam category : String,
+            @RequestParam isActive : Boolean,
+            @RequestParam productDescription : String,
+            @RequestParam files: Array<MultipartFile>,
     ):ResponseEntity<RegisterResponse> {
+
+        println(authProfile.id)
         println("productBrand :$productBrand")
         println("productName : $productName")
         println("productPrice : $productPrice")
@@ -87,6 +86,7 @@ class ProductController(private val productService : ProductService) {
 
             val insertProduct = p.insert {
             it[this.productName] = productName
+            it[this.brand_id] = authProfile.id  //로그인한 판매자id 삽입
             it[this.productBrand] = productBrand
             it[this.productPrice] = productPrice
             it[this.category] = category
@@ -131,10 +131,19 @@ class ProductController(private val productService : ProductService) {
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
+
 //    @GetMapping("/inventory")
 //    fun inventoryManagement(){
 //        val productList = mutableListOf<Map<String,String>>()
 //
 //    }
 
+@Auth
+@GetMapping("/inventory")
+fun getInventroy(@RequestAttribute authProfile: AuthProfile){
+    authProfile.id
+
 }
+
+}
+

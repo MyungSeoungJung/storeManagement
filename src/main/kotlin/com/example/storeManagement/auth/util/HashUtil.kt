@@ -1,4 +1,4 @@
-package com.root.backend.auth.util
+package com.example.storeManagement.auth.util
 
 import at.favre.lib.crypto.bcrypt.BCrypt
 

@@ -1,12 +1,13 @@
-package com.root.backend.auth
+package com.example.storeManagement.auth
 
-import com.root.backend.auth.Profiles.brandIntro
-import com.root.backend.auth.Profiles.brandName
-import com.root.backend.auth.Profiles.businessNumber
-import com.root.backend.auth.Profiles.representativeName
-import com.root.backend.auth.util.HashUtil
-import com.root.backend.auth.util.JwtUtil
-import com.root.backend.auth.util.JwtUtil.extractToken
+import com.example.storeManagement.auth.Profiles.brandIntro
+import com.example.storeManagement.auth.Profiles.brandName
+import com.example.storeManagement.auth.Profiles.businessNumber
+import com.example.storeManagement.auth.Profiles.representativeName
+import com.example.storeManagement.auth.util.HashUtil
+import com.example.storeManagement.auth.util.JwtUtil
+import com.example.storeManagement.auth.util.JwtUtil.extractToken
+import com.root.backend.auth.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.exposed.dao.id.EntityID
@@ -15,7 +16,6 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.transactions.transactionManager
 import org.slf4j.LoggerFactory
-import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RequestPart
@@ -63,20 +63,20 @@ class AuthService(private val database: Database) {
                 val p = Profiles;
 
                 // 인증정보 조회
-                val identityRecord = i.select(i.username eq username).singleOrNull()
+                val identityRecord = i.select(Identities.username eq username).singleOrNull()
                         ?: run {
                             println("User with username $username not found.")
                             return@transaction Pair(false, mapOf("message" to "Unauthorized"))
                         }
 
                 // 프로필정보 조회
-                val profileRecord = p.select(p.identityId eq identityRecord[i.id].value).singleOrNull()
+                val profileRecord = p.select(Profiles.identityId eq identityRecord[i.id].value).singleOrNull()
                         ?: return@transaction Pair(false, mapOf("message" to "Conflict")) // 에러나면 삭제
 
                 return@transaction Pair(true, mapOf(
                         "id" to profileRecord[p.id],
-                        "username" to identityRecord[i.username],
-                        "secret" to identityRecord[i.secret]
+                        "username" to identityRecord[Identities.username],
+                        "secret" to identityRecord[Identities.secret]
                 ))
             }
 
@@ -153,7 +153,7 @@ class AuthService(private val database: Database) {
         transaction {
             try {
                 val result = Profiles.insert {
-                    it[this.identityId] = userId
+                    it[identityId] = userId
                     it[this.brandName] = brandName
                     it[this.businessNumber] = businessNumber
                     it[this.representativeName] = representativeName

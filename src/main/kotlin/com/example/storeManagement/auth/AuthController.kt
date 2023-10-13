@@ -1,17 +1,16 @@
-package com.root.backend.auth
+package com.example.storeManagement.auth
 
-import com.root.backend.auth.util.JwtUtil
+import com.example.storeManagement.auth.util.JwtUtil
 import jakarta.servlet.http.Cookie
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 import java.util.*
 
 @RestController
 @RequestMapping("/auth")
-@CrossOrigin(origins = ["http://localhost:5000"])
+//@CrossOrigin(origins = ["http://localhost:5000"])
 class AuthController(private val service: AuthService) {
 
     //1. (브라우저) 로그인 요청

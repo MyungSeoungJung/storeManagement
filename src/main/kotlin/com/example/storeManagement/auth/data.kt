@@ -1,4 +1,4 @@
-package com.root.backend.auth
+package com.example.storeManagement.auth
 
 import org.springframework.web.multipart.MultipartFile
 

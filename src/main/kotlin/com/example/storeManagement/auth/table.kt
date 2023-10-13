@@ -1,4 +1,4 @@
-package com.root.backend.auth
+package com.example.storeManagement.auth
 
 import jakarta.annotation.PostConstruct
 import org.jetbrains.exposed.dao.id.LongIdTable

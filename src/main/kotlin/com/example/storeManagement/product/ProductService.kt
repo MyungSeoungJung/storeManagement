@@ -1,6 +1,5 @@
 package com.example.storeManagement.product
 
-import ProductMessageRequest
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.springframework.amqp.rabbit.core.RabbitTemplate
 import org.springframework.stereotype.Service

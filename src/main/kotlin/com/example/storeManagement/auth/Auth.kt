@@ -1,4 +1,4 @@
-package com.root.backend.auth
+package com.example.storeManagement.auth
 
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY_GETTER, AnnotationTarget.PROPERTY_SETTER)

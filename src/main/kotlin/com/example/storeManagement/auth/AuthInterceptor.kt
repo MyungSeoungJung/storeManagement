@@ -1,6 +1,6 @@
-package com.root.backend.auth
+package com.example.storeManagement.auth
 
-import com.root.backend.auth.util.JwtUtil
+import com.example.storeManagement.auth.util.JwtUtil
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.stereotype.Component

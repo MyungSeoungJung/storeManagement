@@ -1,37 +1,25 @@
+package com.example.storeManagement.product
 
-//data class ProductInfo(
-//        var id : Long,
-//        var brand : String,
-//        var product: List<ProductWithFiles>,
-//)
+// 인벤토리
+data class InventoryResponse (
+        val productBrand: String,
+        val productName: String,
+        val productPrice: String,
+        val isActive : Boolean,
+        val category: String,
+        val productDescription: String,
+        val imageByteArrayList: List<ProductFile>
+)
+data class ProductFile(
+        val id : Long,
+        val postId : Long,
+        var uuidFileName : String,
+        val originalFileName : String,
+        val contentType: String,
+)
 
-//data class Product(
-//        var id : Long,
-//        var productName : String,
-//        var productPrice : Long,
-//        var productCode : String,
-//        var majorCategory : String,
-//        var subCategory : String,
-//        var productDescription : String,
-//)
 
-//data class ProductFile(
-//        val id : Long,
-//        val productId : Long,
-//        var uuidFileName : String,
-//        val originalFileName : String,
-//        val contentType: String,
-//)
-//
-//data class ProductWithFiles(
-//        var id : Long,
-//        var productName : String,
-//        var productPrice : Long,
-//        var productCode : String,
-//        var category : String,
-//        var productDescription : String,
-//        val file: List<ProductFile>
-//)
+// 제품
 data class ProductMessageRequest(
         val id: Long,
         val productBrand: String,
