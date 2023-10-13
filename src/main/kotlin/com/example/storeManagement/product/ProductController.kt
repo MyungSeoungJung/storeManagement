@@ -6,8 +6,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.exposed.sql.batchInsert
 import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.springframework.core.io.ResourceLoader
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
@@ -19,7 +23,8 @@ import java.util.*
 
 @RestController
 @RequestMapping("/product")
-class ProductController(private val productService : ProductService) {
+class ProductController(private val productService : ProductService,
+                        private val resourceLoader: ResourceLoader) {
     private val POST_FILE_PATH = "files/productImg";
 
     @Auth
@@ -137,13 +142,72 @@ class ProductController(private val productService : ProductService) {
 //        val productList = mutableListOf<Map<String,String>>()
 //
 //    }
+    @Auth
+    @GetMapping("/inventory")   //전체 재고
+    fun getInventory(@RequestAttribute authProfile: AuthProfile) = transaction {
+    val p = Product
+    val pf = ProductFiles
+    val inven = ProductInventory
 
-@Auth
-@GetMapping("/inventory")
-fun getInventroy(@RequestAttribute authProfile: AuthProfile){
-    authProfile.id
+    // 일치하는 제품을 선택
+    val selectedProducts = p.select { p.brand_id eq authProfile.id }.toList()
+    
+//   반환할 제품 전체 데이터
+    val productResponse = selectedProducts.map { r ->
+        val productId = r[p.id]
 
+        // 제품 이미지 DB에서 productID와 일치하는 애들만 추리기
+        val productFiles = pf.select { pf.productId eq productId }.map { fileRow ->
+            ProductFileResponse(
+                    id = fileRow[pf.id].value,
+                    postId = productId,
+                    uuidFileName = fileRow[pf.uuidFileName],
+                    originalFileName = fileRow[pf.originalFileName],
+                    contentType = fileRow[pf.contentType]
+            )
+        }
+        val productInfo = inven.select { inven.productId eq productId }.map { r ->
+            ProductInventoryResponse(
+                    quantity = r[inven.quantity],
+                    lastUpdated = r[inven.lastUpdated].toString(),
+            )
+        }
+        InventoryResponse(
+                id = r[p.id],
+                productBrand = r[p.productBrand],
+                productName = r[p.productName],
+                productPrice = r[p.productPrice].toString(),
+                isActive = r[p.isActive],
+                category = r[p.category],
+                productDescription = r[p.productDescription],
+                files = productFiles,
+                productInfo = productInfo
+        )
+
+
+
+    }
+
+    return@transaction productResponse
 }
 
-}
+    @GetMapping("/files/{uuidFilename}")  //이미지/동영상 요청
+    fun downloadFile(@PathVariable uuidFilename : String) : ResponseEntity<Any> {
+        val file = Paths.get("$POST_FILE_PATH/$uuidFilename").toFile()
+        if (!file.exists()) {
+            return ResponseEntity.notFound().build()
+        }
+
+        val mimeType = Files.probeContentType(file.toPath())
+        val mediaType = MediaType.parseMediaType(mimeType)
+
+        val resource = resourceLoader.getResource("file:$file")
+        return ResponseEntity.ok()
+                .contentType(mediaType) // video/mp4, image/png, image/jpeg
+                .body(resource)
+    }
+
+
+
+}  // 끝
 
