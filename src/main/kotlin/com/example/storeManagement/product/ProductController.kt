@@ -78,10 +78,10 @@ class ProductController(private val productService : ProductService) {
                     }
                 }
             }
-        
+
 //       데이터베이스 처리 로직
         val result = transaction {
-            val p = Product
+            val p = Product   //인터셉터해서 brand_id insert하기
             val pf = ProductFiles
             val pi = ProductInventory
 
@@ -117,14 +117,15 @@ class ProductController(private val productService : ProductService) {
                 imageByteArrayList = imageByteArrayList
             )
 
-
-        //상품등록 queue 전송
-        productService.createProductMessage(productMessageRequest)
+            //상품등록 queue 전송
+            println("확인----------------------$productMessageRequest" )
+            productService.createProductMessage(productMessageRequest)
 
             return@transaction RegisterResponse(
                 productName = productName,
                 productPrice = productPrice
             )
+
         }  // transction
 
         return ResponseEntity.status(HttpStatus.CREATED).body(result);

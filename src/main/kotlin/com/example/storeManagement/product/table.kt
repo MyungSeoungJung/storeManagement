@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Configuration
 
 object Product : Table("product"){
     val id = long("id").autoIncrement()
+    val brand_id = long("brand_id")
     val productBrand = varchar("product_brand", 20)
     val productName = varchar("product_name", 20)
     val productPrice = long("product_price")
