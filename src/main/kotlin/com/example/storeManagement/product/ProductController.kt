@@ -4,12 +4,11 @@ import com.example.storeManagement.auth.Auth
 import com.example.storeManagement.auth.AuthProfile
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.jetbrains.exposed.sql.batchInsert
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.select
-import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.core.io.ResourceLoader
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -54,7 +53,7 @@ class ProductController(private val productService : ProductService,
             }   //없으면 파일 생성
 
             val fileList = mutableListOf<Map<String,String?>>() //변경 가능한 리스트 생성
-            val imageByteArrayList = mutableListOf<ByteArray>()
+            val uuidList = mutableListOf<String>()
             //file처리 로직
             runBlocking { // 코루틴
                 files.forEach { // 각각 파일 병렬
@@ -69,11 +68,11 @@ class ProductController(private val productService : ProductService,
 
                         val filePath = dirPath.resolve(uuidFileName)
 
-                        it.inputStream.use { inputStream ->
-                            val bytes = inputStream.readBytes()
+                        uuidList.add(uuidFileName!!) //보낼 uuid
 
+
+                        it.inputStream.use { inputStream ->
                             Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING)
-                            imageByteArrayList.add(bytes) // 이미지 파일의 바이트 배열을 리스트에 추가
                         }
 
                         fileList.add(mapOf("uuidFileName" to uuidFileName,
@@ -112,14 +111,14 @@ class ProductController(private val productService : ProductService,
 
             // queue 전송 로직
             val productMessageRequest = ProductMessageRequest(
-                id = 1,   //인터셉터 들어오면 인터셉터된 profile의 id 삽입
+                id = insertProduct[p.id],
                 productBrand = productBrand,
                 productName = productName,
                 productPrice = productPrice.toString(),
                 isActive = isActive,
                 category = category,
                 productDescription = productDescription,
-                imageByteArrayList = imageByteArrayList
+                imageUuidName = uuidList
             )
 
             //상품등록 queue 전송
@@ -142,37 +141,60 @@ class ProductController(private val productService : ProductService,
 //        val productList = mutableListOf<Map<String,String>>()
 //
 //    }
-    @Auth
-    @GetMapping("/inventory")   //전체 재고
-    fun getInventory(@RequestAttribute authProfile: AuthProfile) = transaction {
+@Auth
+@GetMapping("/inventory")   //전체 재고
+fun getInventory(@RequestAttribute authProfile: AuthProfile,
+                 @RequestParam state : String,
+                 @RequestParam(required = false) keyword: String?,
+                 @RequestParam size: Int,
+                 @RequestParam page: Int
+) = transaction {
     val p = Product
     val pf = ProductFiles
     val inven = ProductInventory
+    println(state)
+    println(page)
+    println(size)
+    println(keyword)
 
-    // 일치하는 제품을 선택
-    val selectedProducts = p.select { p.brand_id eq authProfile.id }.toList()
-    
+    // 전체 제품
+    val stateProducts = when (state) {
+        "true" -> p.select { (p.brand_id eq authProfile.id) and (p.isActive eq true) }
+        "false" -> p.select { (p.brand_id eq authProfile.id) and (p.isActive eq false) }
+        else -> p.select { p.brand_id eq authProfile.id }
+    }
+    val searchProduct = if (keyword.isNullOrBlank()){
+        stateProducts
+    }else{
+        stateProducts.andWhere { p.productName like "%$keyword%" }
+    }
+
+    val totalCount = searchProduct.count()
 //   반환할 제품 전체 데이터
-    val productResponse = selectedProducts.map { r ->
-        val productId = r[p.id]
+    val productResponse = stateProducts
+        .orderBy(p.id,SortOrder.DESC)
+        .limit(size, offset= (size * page).toLong())
+        .map { r ->
 
-        // 제품 이미지 DB에서 productID와 일치하는 애들만 추리기
-        val productFiles = pf.select { pf.productId eq productId }.map { fileRow ->
-            ProductFileResponse(
-                    id = fileRow[pf.id].value,
+            val productId = r[p.id]
+
+            // 제품 이미지 DB에서 productID와 일치하는 애들만 추리기
+            val productFiles = pf.select { pf.productId eq productId }.map { r ->
+                ProductFileResponse(
+                    id = r[pf.id].value,
                     postId = productId,
-                    uuidFileName = fileRow[pf.uuidFileName],
-                    originalFileName = fileRow[pf.originalFileName],
-                    contentType = fileRow[pf.contentType]
-            )
-        }
-        val productInfo = inven.select { inven.productId eq productId }.map { r ->
-            ProductInventoryResponse(
+                    uuidFileName = r[pf.uuidFileName],
+                    originalFileName = r[pf.originalFileName],
+                    contentType = r[pf.contentType]
+                )
+            }
+            val productInfo = inven.select { inven.productId eq productId }.map { r ->
+                ProductInventoryResponse(
                     quantity = r[inven.quantity],
                     lastUpdated = r[inven.lastUpdated].toString(),
-            )
-        }
-        InventoryResponse(
+                )
+            }
+            InventoryResponse(
                 id = r[p.id],
                 productBrand = r[p.productBrand],
                 productName = r[p.productName],
@@ -182,15 +204,13 @@ class ProductController(private val productService : ProductService,
                 productDescription = r[p.productDescription],
                 files = productFiles,
                 productInfo = productInfo
-        )
+            )
 
+        }
 
-
-    }
-
-    return@transaction productResponse
+    val response = PageImpl(productResponse, PageRequest.of(page, size), totalCount)
+    return@transaction response
 }
-
     @GetMapping("/files/{uuidFilename}")  //이미지/동영상 요청
     fun downloadFile(@PathVariable uuidFilename : String) : ResponseEntity<Any> {
         val file = Paths.get("$POST_FILE_PATH/$uuidFilename").toFile()
@@ -208,6 +228,4 @@ class ProductController(private val productService : ProductService,
     }
 
 
-
 }  // 끝
-

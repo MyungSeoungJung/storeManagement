@@ -33,7 +33,7 @@ data class ProductMessageRequest(
         val isActive : Boolean,
         val category: String,
         val productDescription: String,
-        val imageByteArrayList: MutableList<ByteArray>
+        val imageUuidName : List<String>
 )
 data class RegisterResponse(
         val productName : String,

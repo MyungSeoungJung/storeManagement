@@ -7,7 +7,6 @@ import com.example.storeManagement.auth.Profiles.representativeName
 import com.example.storeManagement.auth.util.HashUtil
 import com.example.storeManagement.auth.util.JwtUtil
 import com.example.storeManagement.auth.util.JwtUtil.extractToken
-import com.root.backend.auth.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.exposed.dao.id.EntityID
