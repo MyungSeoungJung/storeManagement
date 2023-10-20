@@ -1,4 +1,4 @@
-package com.example.storeManagement.auth.util
+package com.root.backend.auth.util
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.JWTVerifier
@@ -58,3 +58,4 @@ object JwtUtil {
         return null
     }
 }
+
