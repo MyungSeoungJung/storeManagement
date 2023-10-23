@@ -182,7 +182,7 @@ fun getInventory(@RequestAttribute authProfile: AuthProfile,
             val productFiles = pf.select { pf.productId eq productId }.map { r ->
                 ProductFileResponse(
                     id = r[pf.id].value,
-                    postId = productId,
+                    productId = productId,
                     uuidFileName = r[pf.uuidFileName],
                     originalFileName = r[pf.originalFileName],
                     contentType = r[pf.contentType]
@@ -213,6 +213,7 @@ fun getInventory(@RequestAttribute authProfile: AuthProfile,
 }
     @GetMapping("/files/{uuidFilename}")  //이미지/동영상 요청
     fun downloadFile(@PathVariable uuidFilename : String) : ResponseEntity<Any> {
+        println("check------------------------------------------------------- $uuidFilename")
         val file = Paths.get("$POST_FILE_PATH/$uuidFilename").toFile()
         if (!file.exists()) {
             return ResponseEntity.notFound().build()

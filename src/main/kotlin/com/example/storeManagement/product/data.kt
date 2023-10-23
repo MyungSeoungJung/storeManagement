@@ -14,7 +14,7 @@ data class InventoryResponse (
 )
 data class ProductFileResponse(
         val id : Long,
-        val postId : Long,
+        val productId : Long,
         var uuidFileName : String,
         val originalFileName : String,
         val contentType: String,

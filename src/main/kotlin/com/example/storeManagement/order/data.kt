@@ -10,29 +10,44 @@ data class OrderResultResponse (
     val orderId : Long,
     val isPermission : String,
 )
-
+// 상품 데이터 클래스 ------------------------------------------------------------------------
 data class ProductInfo (
     val productId: Long,
     val productName : String,
 )
-data class OrderStateAndTable(
-    val orderId: Long,
-    val orderStatus: String, // 실제 데이터 유형과 일치하도록 조정
-    val quantity: Int, // 데이터에 따라 유형을 조정
-    val orderDate: String // 데이터에 따라 유형을 조정
+data class ProductFile(
+    var uuidFileName : String,
+    val originalFileName : String,
+    val contentType: String,
 )
+data class ProductInfoAndFile(
+    val productId: Long,
+    val productName : String,
+    var uuidFileName : String,
+    val originalFileName : String,
+    val contentType: String,
+)
+
+// 주문 데이터 클래스 ---------------------------------------------------------------------
 data class OrderInfo (
     val orderId : Long,
     val quantity : Int,
     val orderDate : String
 )
-data class OrderCondition (
+data class OrderCondition (   // orderState
     val orderState : String
 )
 
-data class OrderDetails  (
-    val productInfo: List<ProductInfo>,
+data class OrderDetailsResponse  (
     val orderInfo: List<OrderInfo>,
     val orderState : List<OrderCondition>,
+    val productInfo : List<ProductInfo>,
+    val productFile : List<ProductFile>,
 )
-
+data class OrderStateAndInfo(  // orderState랑 orderTable 조인 데이터 클래스
+    val orderId: Long,
+    val orderStatus: String,
+    val quantity: Int,
+    val orderDate: String
+)
+// 주문 데이터 클래스 ---------------------------------------------------------------------
