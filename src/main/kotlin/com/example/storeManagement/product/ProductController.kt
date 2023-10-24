@@ -203,7 +203,6 @@ fun getInventory(@RequestAttribute authProfile: AuthProfile,
             )
 
         }
-
     val response = PageImpl(productResponse, PageRequest.of(page, size), totalCount)
     return@transaction response
 }

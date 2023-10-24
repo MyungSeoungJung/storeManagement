@@ -1,6 +1,5 @@
 package com.example.storeManagement.product
 
-import com.example.storeManagement.order.OrderState
 import com.example.storeManagement.order.OrderTable
 import jakarta.annotation.PostConstruct
 import org.jetbrains.exposed.dao.id.IntIdTable
@@ -51,7 +50,7 @@ class TableSetup(private val database: Database) {
         // expose 라이버리에서는 모든 SQL 처리는
         // transaction 함수의 statement 람다함수 안에서 처리를 해야함
         transaction(database) {
-            SchemaUtils.createMissingTablesAndColumns(Product, ProductFiles,ProductInventory, OrderTable,OrderState)
+            SchemaUtils.createMissingTablesAndColumns(Product, ProductFiles,ProductInventory, OrderTable)
         }
     }
 }
