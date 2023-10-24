@@ -10,5 +10,4 @@ select * from order_table;
 
 SELECT *
 FROM order_table
-INNER JOIN product
-ON order_table.productId = product.id;
+INNER JOIN product ON order_table.product_id = product.id;

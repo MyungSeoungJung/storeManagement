@@ -29,17 +29,12 @@ data class ProductInfoAndFile(
 )
 
 // 주문 데이터 클래스 ---------------------------------------------------------------------
-data class OrderInfo (
-    val orderId : Long,
-    val quantity : Int,
-    val orderDate : String
-)
-data class OrderCondition (   // orderState
-    val orderState : Boolean
-)
 
 data class OrderDetailsResponse  (
-    val orderInfo: List<OrderStateAndInfo>,
+    val orderId : Long,
+    val quantity : Int,
+    val orderDate : String,
+    val orderState : Boolean,
     val productInfo : List<ProductInfoAndFile>?,
 
 )

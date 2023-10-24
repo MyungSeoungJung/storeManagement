@@ -46,8 +46,8 @@ class OrderService(private val rabbitTemplate: RabbitTemplate) {
         println("주문 ------------$orderRequest-------------------------")
         val o = OrderTable
 
-           transaction {
-               o.insert {
+           val result = transaction {
+               val insertOrder = o.insert {
                    it[this.orderId] = orderRequest.orderId
                    it[this.userId] = orderRequest.userId
                    it[this.productId] = orderRequest.productId
@@ -60,22 +60,21 @@ class OrderService(private val rabbitTemplate: RabbitTemplate) {
                println(orderRequest)
                val pi = ProductInventory
                // 주문제품 id랑 재고 제품 id 비교
-               val findProduct = pi.select { pi.productId eq orderRequest.productId}.singleOrNull()
+               val findProduct = pi.select { pi.productId eq orderRequest.productId}
 
-               println(findProduct)
-               if (findProduct != null) {
-                   val currentQuantity = findProduct[pi.quantity]
-                   if (currentQuantity >= orderRequest.quantity) {
+               val currentQuantity = findProduct.singleOrNull()?.get(pi.quantity)
+               println(currentQuantity)
+               if (currentQuantity != null) {
+                   if (!findProduct.empty() && currentQuantity >= orderRequest.quantity) { //레코드 반환이라 null이 아니라 empty로 체크
                        // 재고수량 - 주문 수량 빼기 DB업데이트문
-                       val updatedQuantity = currentQuantity - orderRequest.quantity  // 현재 수량 - 주문 수량
+                       val newQuantity = currentQuantity - orderRequest.quantity  // 현재 수량 - 주문 수량
 
                        pi.update ({pi.productId eq orderRequest.productId}) {
-                           it[quantity] = updatedQuantity
+                           it[quantity] = newQuantity
                        }
-                       o.update {
+                       o.update({ o.orderId eq orderRequest.orderId }) {
                            it[o.orderStatus] = true
                        }
-
                        // 성공 메세지 보내기
                        val successOrderRequest = OrderResultResponse(
                            orderId = orderRequest.orderId,
@@ -83,11 +82,14 @@ class OrderService(private val rabbitTemplate: RabbitTemplate) {
                        )
                        sendResultMessage(successOrderRequest)
 
-                   } else if (currentQuantity == 0 || orderRequest.quantity == 0 ||  orderRequest.quantity > currentQuantity){  //추가
+                   } else if (findProduct.empty() || currentQuantity == 0 || orderRequest.quantity == 0 ||  orderRequest.quantity > currentQuantity){  //추가
                        val falseOrderRequest = OrderResultResponse (
                            orderId = orderRequest.orderId,
                            isPermission = "false"
                        )
+                       o.update({ o.orderId eq orderRequest.orderId }) {
+                           it[o.orderStatus] = false
+                       }
                        sendResultMessage(falseOrderRequest)
 
                    }
