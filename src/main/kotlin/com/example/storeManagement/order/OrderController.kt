@@ -47,8 +47,9 @@ class OrderController (private val orderService: OrderService) {
         val searchOrderId = if (keyword == null) {
             stateQuery
         } else {
-            stateQuery.andWhere { OrderTable.orderId eq keyword }
+            stateQuery.andWhere { OrderTable.id eq keyword }
         }
+        println("keyword----------------------$keyword")
         val totalCount = searchOrderId.count()
 //        ---------------------------------------------------------------------
         //mapNotNull => null 값 제외
