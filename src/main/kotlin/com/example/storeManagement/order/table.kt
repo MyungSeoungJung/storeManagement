@@ -18,7 +18,7 @@ object OrderTable : Table("order_table"){
 
 object OrderState : LongIdTable("order_state") {
     val orderId = reference("order_id", OrderTable.id)
-    val orderStatus = varchar("orderStatus",10)
+    val orderStatus = bool("order_status")
 }
 
 //object ProductOrderQuantity : LongIdTable("product_order_quantity") {

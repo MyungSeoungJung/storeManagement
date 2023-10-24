@@ -83,7 +83,7 @@ class OrderService(private val rabbitTemplate: RabbitTemplate) {
                    }
                    os.insert {
                        it[os.orderId] = orderRequest.orderId
-                       it[os.orderStatus] = "처리 완료"
+                       it[os.orderStatus] = true
                    }
                    // 성공 메세지 보내기
                    val successOrderRequest = OrderResultResponse(
@@ -99,7 +99,7 @@ class OrderService(private val rabbitTemplate: RabbitTemplate) {
                 )
                    os.insert {
                        it[os.orderId] = orderRequest.orderId
-                       it[os.orderStatus] = "처리 실패"
+                       it[os.orderStatus] = false
                    }
                    sendResultMessage(falseOrderRequest)
 

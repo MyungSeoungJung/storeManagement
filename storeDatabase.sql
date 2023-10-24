@@ -12,8 +12,13 @@ select * from order_state;
 
 INSERT INTO order_table (order_id, user_id, product_id, quantity, address, order_date)
 VALUES
-  (1, 1, 1, 1, 'Address 1', NOW());
-INSERT INTO order_state (order_id, orderStatus)
+  (1, 1, 1, 1, 'Address 1', NOW()),
+  (3, 2, 1, 2, 'Address 1.test', NOW()),
+  (2, 2, 2, 2, 'Address 2', NOW());
+INSERT INTO order_state (order_id, order_status)
 VALUES
-  (1, '처리완료');
-  
+  (1, true),
+  (1, false),
+  (2, false),
+  (3, true);
+

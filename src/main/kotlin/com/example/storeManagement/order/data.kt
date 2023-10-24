@@ -35,18 +35,17 @@ data class OrderInfo (
     val orderDate : String
 )
 data class OrderCondition (   // orderState
-    val orderState : String
+    val orderState : Boolean
 )
 
 data class OrderDetailsResponse  (
-    val orderInfo: List<OrderInfo>,
-    val orderState : List<OrderCondition>,
-    val productInfo : List<ProductInfo>,
-    val productFile : List<ProductFile>,
+    val orderInfo: List<OrderStateAndInfo>,
+    val productInfo : List<ProductInfoAndFile>?,
+
 )
 data class OrderStateAndInfo(  // orderState랑 orderTable 조인 데이터 클래스
     val orderId: Long,
-    val orderStatus: String,
+    val orderStatus: Boolean,
     val quantity: Int,
     val orderDate: String
 )
