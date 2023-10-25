@@ -39,9 +39,9 @@ data class RegisterResponse(
         val productName : String,
         val productPrice : Long,
 )
-
-
-//data class ImageInfo(
-//        val id: Long,
-//        val imageData: ByteArray
-//)
+data class ModifyProduct (
+        val isActive : String,
+        val productName : String,
+        val quantity : String,
+        val productPrice : String,
+)

@@ -5,6 +5,7 @@ import com.example.storeManagement.auth.AuthProfile
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.core.io.ResourceLoader
 import org.springframework.data.domain.PageImpl
@@ -222,5 +223,21 @@ fun getInventory(@RequestAttribute authProfile: AuthProfile,
                 .body(resource)
     }
 
+    @PutMapping("/modifyProduct")
+    fun modifyInventory(@RequestParam id : Long,
+            @RequestBody req : ModifyProduct){
+        println(id)
+        println(req)
+        val p = Product
+        val pi = ProductInventory
+        transaction {
+            p.update({ p.id eq id }) {
+                it[p.productName] = req.productName
+                it[p.isActive] = req.isActive.toBoolean()
+                it[p.productPrice] = req.productPrice.toLong()
+            }
+        }
 
+
+    }
 }  // 끝
