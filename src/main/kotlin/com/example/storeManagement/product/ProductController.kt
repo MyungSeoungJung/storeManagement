@@ -2,6 +2,7 @@ package com.example.storeManagement.product
 
 import com.example.storeManagement.auth.Auth
 import com.example.storeManagement.auth.AuthProfile
+import com.example.storeManagement.product.Product.maximumPurchaseQuantity
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.exposed.sql.*
@@ -37,6 +38,8 @@ class ProductController(private val productService : ProductService,
             @RequestParam category : String,
             @RequestParam isActive : Boolean,
             @RequestParam productDescription : String,
+            @RequestParam maximumPurchaseQuantity : Int,
+            @RequestParam discountRate : Int,
             @RequestParam files: Array<MultipartFile>,
     ):ResponseEntity<RegisterResponse> {
 
@@ -96,6 +99,8 @@ class ProductController(private val productService : ProductService,
             it[this.productPrice] = productPrice
             it[this.category] = category
             it[this.isActive] = isActive
+            it[this.maximumPurchaseQuantity] = maximumPurchaseQuantity
+            it[this.discountRate] = discountRate
             it[this.productDescription] = productDescription
             }
             pf.batchInsert(fileList) {
@@ -118,6 +123,8 @@ class ProductController(private val productService : ProductService,
                 productPrice = productPrice.toString(),
                 isActive = isActive,
                 category = category,
+                maximumPurchaseQuantity = maximumPurchaseQuantity,
+                discountRate = discountRate,
                 productDescription = productDescription,
                 imageUuidName = uuidList
             )
@@ -198,7 +205,9 @@ fun getInventory(@RequestAttribute authProfile: AuthProfile,
                 productPrice = r[p.productPrice].toString(),
                 isActive = r[p.isActive],
                 category = r[p.category],
+                maximumPurchaseQuantity = r[p.maximumPurchaseQuantity],
                 productDescription = r[p.productDescription],
+                discountRate = r[p.discountRate],
                 files = productFiles,
                 productInfo = productInfo
             )
@@ -235,6 +244,12 @@ fun getInventory(@RequestAttribute authProfile: AuthProfile,
                 it[p.productName] = req.productName
                 it[p.isActive] = req.isActive.toBoolean()
                 it[p.productPrice] = req.productPrice.toLong()
+                it[p.maximumPurchaseQuantity] = req.maximumPurchaseQuantity.toInt()
+                it[p.discountRate] = req.discountRate.toInt()
+            }
+
+            pi.update ({pi.productId eq id}) {
+                it[pi.quantity] = req.quantity.toInt()
             }
         }
 

@@ -20,6 +20,8 @@ object Product : Table("product"){
     val category = varchar("category",10)  //tent, table, accessory, tableware, other
     val isActive = bool("is_Active") //활성화/비활성화
     val productDescription = text("product_Description",)   //제품 설명
+    val maximumPurchaseQuantity = integer("maximum_purchase_quantity")
+    val discountRate = integer("discountRate")
     override val primaryKey = PrimaryKey(id, name = "pk_product_id")
 }
 

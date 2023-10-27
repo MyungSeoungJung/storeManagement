@@ -9,6 +9,8 @@ data class InventoryResponse (
         val isActive : Boolean,
         val category: String,
         val productDescription: String,
+        val maximumPurchaseQuantity : Int,
+        val discountRate : Int,
         val files: List<ProductFileResponse>,
         val productInfo : List<ProductInventoryResponse>
 )
@@ -32,6 +34,8 @@ data class ProductMessageRequest(
         val productPrice: String,
         val isActive : Boolean,
         val category: String,
+        val maximumPurchaseQuantity : Int,
+        val discountRate : Int,
         val productDescription: String,
         val imageUuidName : List<String>
 )
@@ -44,4 +48,6 @@ data class ModifyProduct (
         val productName : String,
         val quantity : String,
         val productPrice : String,
+        val maximumPurchaseQuantity : String,
+        val discountRate : String,
 )

@@ -23,10 +23,15 @@ class WebMvcConfig(val authInterceptor: AuthInterceptor) : WebMvcConfigurer {
                         "http://localhost:5500",
                         "http://127.0.0.1:5500",
                         "http://localhost:5000",
-                    "http://192.168.0.88:8080"
+                        "http://192.168.0.88:8080",
+                        "http://192.168.100.151:8080",
+                        "http://192.168.100.152:5000"
+
 
                 ) // 로컬 호스트 origin 허용
                 .allowedMethods("*") // 모든 메서드 허용(GET, POST.....)
+                .allowedHeaders("*")
+                .allowCredentials(true);
     }
     // 인증처리용 인터셉터를 추가
     override fun addInterceptors(registry: InterceptorRegistry) {
