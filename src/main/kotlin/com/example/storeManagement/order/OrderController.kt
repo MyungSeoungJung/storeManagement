@@ -73,7 +73,7 @@ class OrderController (private val orderService: OrderService) {
                     // 검색
                     // 제품 + 제품 사진 합치기
                     val productInfoAndFile =
-                        (Product innerJoin ProductFiles).select { (Product.id eq productId) }
+                        (Product innerJoin ProductFiles).select { (Product.id eq r[o.productId]) }
                             .map {//로그인한 유저가 등록한 제품만 map
                                 ProductInfoAndFile(
                                     it[Product.id],

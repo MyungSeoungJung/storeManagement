@@ -43,16 +43,17 @@ class ChartController {
                 orders.forEach { order ->
                     val productCategory = innerJoinOrderAndProduct
                         .select { p.id eq order[o.productId] }
-                        .map { it[p.category] }
+                        .map { it[p.category] } // 순회중인 주문의 카테고리를 추출
                         .firstOrNull()
 
                     if (productCategory != null) {
-                        val orderDate = order[o.orderDate]
-                        val month = orderDate.monthValue
-                        val orderQuantity = order[o.quantity]
+                        val orderDate = order[o.orderDate]  //순회중인 주문의 orderDate 
+                        val month = orderDate.monthValue   // 순회중인 주문의 월
+                        val orderQuantity = order[o.quantity] // 순회중인 주문의 수량
 
-                        categoryTotalMap
+                        categoryTotalMap  //순회중인 카테고리 ex 텐트면 텐트에 orderQuantity 추가
                             .getOrPut(productCategory) { MutableList(12) { 0 } }
+                     // set 사용해서 내가 원하는 인덱스에 값 설정  ex : month 값이 11월이라면 -1 해서 10번째 인덱스에 값 설정
                             .set(month - 1, categoryTotalMap[productCategory]!![month - 1] + orderQuantity)
                     }
                 }

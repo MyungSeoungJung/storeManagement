@@ -51,3 +51,5 @@ data class ModifyProduct (
         val maximumPurchaseQuantity : String,
         val discountRate : String,
 )
+
+

@@ -6,6 +6,7 @@ import com.example.storeManagement.auth.Auth
 import com.example.storeManagement.auth.AuthProfile
 import com.example.storeManagement.product.Product
 import com.example.storeManagement.product.ProductInventory
+import com.example.storeManagement.product.ProductTotalOrder
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -45,9 +46,10 @@ class OrderService(private val rabbitTemplate: RabbitTemplate) {
         emitters.removeAll(deadEmitters)
         println("주문 ------------$orderRequest-------------------------")
         val o = OrderTable
+        val p = Product
 
-           val result = transaction {
-               val insertOrder = o.insert {
+         transaction {
+              o.insert {
                    it[this.orderId] = orderRequest.orderId
                    it[this.userId] = orderRequest.userId
                    it[this.productId] = orderRequest.productId
@@ -56,6 +58,30 @@ class OrderService(private val rabbitTemplate: RabbitTemplate) {
                    it[this.orderDate] = LocalDateTime.now()
                    it[this.orderStatus] = false
                }
+
+// ProductTotalOrder 구문 -------------------
+             val findProductId = p.select { ProductTotalOrder.productId eq orderRequest.productId }
+             val findProductCategory = findProductId.singleOrNull()?.get(p.category)
+             val findProductTotalOrder = findProductId.singleOrNull()
+             val currentTotalOrder = findProductTotalOrder?.get(ProductTotalOrder.totalOrder) ?: 0  //현재 총 주문 없으면 0으로 초기값 설정
+
+             val updatedTotalOrder = currentTotalOrder + orderRequest.quantity  // quantity +=
+
+             if (findProductTotalOrder != null) {
+                 // 이미 주문 통계가 있는 경우 업데이트
+                 ProductTotalOrder.update({ ProductTotalOrder.productId eq orderRequest.productId }) {
+                     it[this.totalOrder] = updatedTotalOrder
+                     it[this.category] = findProductCategory.toString()
+                 }
+             } else {
+                 // 주문 통계가 없는 경우 새 레코드 생성
+                 ProductTotalOrder.insert {
+                     it[this.productId] = orderRequest.productId
+                     it[this.category] = findProductCategory.toString()
+                     it[this.totalOrder] = updatedTotalOrder
+                 }
+             }
+// --------------------------------
 
                println(orderRequest)
                val pi = ProductInventory

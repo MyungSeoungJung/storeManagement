@@ -1,6 +1,9 @@
 package com.example.storeManagement.product
 
 import com.example.storeManagement.order.OrderTable
+import com.example.storeManagement.order.OrderTable.long
+import com.example.storeManagement.order.OrderTable.reference
+import com.example.storeManagement.order.OrderTable.varchar
 import jakarta.annotation.PostConstruct
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.dao.id.LongIdTable
@@ -39,8 +42,11 @@ object ProductInventory : IntIdTable("product_inventory") {
     val quantity = integer("quantity")
     val lastUpdated = datetime("last_updated")
 }
-
-
+object ProductTotalOrder : IntIdTable("product_total_order") {
+    val productId = reference("product_id", Product.id)
+    val category = varchar("category", 10)
+    val totalOrder = long("total_order")
+}
 @Configuration
 class TableSetup(private val database: Database) {
     // migrate(이주하다): 코드 -> DB
@@ -52,7 +58,7 @@ class TableSetup(private val database: Database) {
         // expose 라이버리에서는 모든 SQL 처리는
         // transaction 함수의 statement 람다함수 안에서 처리를 해야함
         transaction(database) {
-            SchemaUtils.createMissingTablesAndColumns(Product, ProductFiles,ProductInventory, OrderTable)
+            SchemaUtils.createMissingTablesAndColumns(Product, ProductFiles,ProductInventory, OrderTable,ProductTotalOrder)
         }
     }
 }
