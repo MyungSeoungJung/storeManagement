@@ -95,47 +95,4 @@ VALUES
 (73, 2, 2, 3, '주소22', '2023-10-20 14:45:00', 1),
 (74, 3, 3, 2, '주소23', '2023-11-10 08:15:00', 1),
 (75, 4, 4, 6, '주소24', '2023-12-05 19:20:00', 1);
-
--- 카테고리별 제품id order_quantity 총량 더미 데이터
-INSERT INTO product_total_order (product_id, category, total_order)
-VALUES
--- Category: tent
-(1, 'tent', 100),
-(2, 'tent', 120),
-(3, 'tent', 90),
-(4, 'tent', 80),
-(5, 'tent', 110),
-(6, 'tent', 95),
-(7, 'tent', 130),
--- Category: table
-(8, 'table', 65),
-(9, 'table', 55),
-(10, 'table', 85),
-(11, 'table', 45),
-(12, 'table', 70),
-(13, 'table', 120),
-(14, 'table', 80),
--- Category: accessory
-(15, 'accessory', 50),
-(16, 'accessory', 105),
-(17, 'accessory', 85),
-(18, 'accessory', 65),
-(19, 'accessory', 75),
-(20, 'accessory', 95),
-(21, 'accessory', 70),
--- Category: tableware
-(22, 'tableware', 65),
-(23, 'tableware', 100),
-(24, 'tableware', 50),
-(25, 'tableware', 80),
-(26, 'tableware', 95),
-(27, 'tableware', 85),
-(28, 'tableware', 110),
--- Category: other
-(29, 'other', 75),
-(30, 'other', 105),
-(31, 'other', 65),
-(32, 'other', 100),
-(33, 'other', 85),
-(34, 'other', 70),
-(35, 'other', 110);
+-- 

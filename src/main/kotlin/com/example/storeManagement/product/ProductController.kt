@@ -268,6 +268,8 @@ class ProductController(private val productService : ProductService,
 
 
     }
+
+
     @Auth
     @GetMapping("/topFiveProduct")
     fun getTopFiveProduct(@RequestAttribute authProfile: AuthProfile) = transaction {
