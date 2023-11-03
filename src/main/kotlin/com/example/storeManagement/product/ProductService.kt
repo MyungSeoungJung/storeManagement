@@ -11,10 +11,10 @@ class ProductService (private val rabbitTemplate: RabbitTemplate) {
     fun createProductMessage(productMessageRequest: ProductMessageRequest) {
         sendMessage(productMessageRequest)
     }
-
     fun sendMessage(productMessageRequest: ProductMessageRequest) {
         rabbitTemplate.convertAndSend("product-register", mapper.writeValueAsString(productMessageRequest))
     }
+
 }
 
 

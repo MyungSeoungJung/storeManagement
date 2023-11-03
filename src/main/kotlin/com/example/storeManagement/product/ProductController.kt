@@ -273,6 +273,7 @@ class ProductController(private val productService : ProductService,
         println(req)
         val p = Product
         val pi = ProductInventory
+
         transaction {
             p.update({ p.id eq id }) {
                 it[p.productName] = req.productName
@@ -286,8 +287,22 @@ class ProductController(private val productService : ProductService,
             pi.update({ pi.productId eq id }) {
                 it[pi.quantity] = req.quantity.toInt()
             }
-        }
+        val productModifyMessageRequest = ProductMessageRequest (
+            id = id,
+            productBrand = "",
+            productName = req.productName,
+            productPrice = req.productPrice,
+            isActive = req.isActive.toBoolean(),
+            category = req.category,
+            maximumPurchaseQuantity =  req.maximumPurchaseQuantity.toInt(),
+            discountRate = req.discountRate.toInt(),
+            productDescription = "",
+            mainImageUuidName = "",
+            imageUuidName = listOf(),
+        )
 
+        productService.createProductMessage(productModifyMessageRequest)
+        }
 
     }
 
@@ -297,7 +312,9 @@ class ProductController(private val productService : ProductService,
 
         val topFiveByCategoryList = mutableListOf<TopFavoriteProduct>()
 
-        val topFiveProduct = pto.selectAll()
+        val pInnerJoinOrder = (Product innerJoin OrderTable)
+
+        val topFiveProduct = pInnerJoinOrder.selectAll()
             .groupBy { it[pto.category] }
             .map { (category, categoryOrders) ->
                 val topOrders = categoryOrders.sortedByDescending { it[pto.totalOrder] }
@@ -305,7 +322,7 @@ class ProductController(private val productService : ProductService,
                     .map { it[pto.productId].toLong() }
                 topFiveByCategoryList.add(TopFavoriteProduct(ids = topOrders, category = category))
             }
-
+        println(topFiveProduct)
         return@transaction topFiveByCategoryList
     }
 
