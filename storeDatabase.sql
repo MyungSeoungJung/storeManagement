@@ -13,7 +13,6 @@ select * from product_total_order;
 SELECT *
 FROM order_table
 INNER JOIN product ON order_table.product_id = product.id;
-
 -- 2021년부터 2023년까지 80건의 주문 데이터 생성
 INSERT INTO order_table (order_id, user_id, product_id, order_quantity, address, order_date, order_status)
 VALUES
@@ -95,4 +94,3 @@ VALUES
 (73, 2, 2, 3, '주소22', '2023-10-20 14:45:00', 1),
 (74, 3, 3, 2, '주소23', '2023-11-10 08:15:00', 1),
 (75, 4, 4, 6, '주소24', '2023-12-05 19:20:00', 1);
--- 

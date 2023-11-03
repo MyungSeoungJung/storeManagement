@@ -25,6 +25,7 @@ object Product : Table("product"){
     val productDescription = text("product_Description",)   //제품 설명
     val maximumPurchaseQuantity = integer("maximum_purchase_quantity")
     val discountRate = integer("discountRate")
+    val mainImageUuidName =  varchar("main_image_uuid_name", 100)
     override val primaryKey = PrimaryKey(id, name = "pk_product_id")
 }
 

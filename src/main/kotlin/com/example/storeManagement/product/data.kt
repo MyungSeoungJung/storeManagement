@@ -37,6 +37,7 @@ data class ProductMessageRequest(
         val maximumPurchaseQuantity : Int,
         val discountRate : Int,
         val productDescription: String,
+        val mainImageUuidName : String,
         val imageUuidName : List<String>
 )
 data class RegisterResponse(
@@ -50,6 +51,11 @@ data class ModifyProduct (
         val productPrice : String,
         val maximumPurchaseQuantity : String,
         val discountRate : String,
+        val category: String,
+)
+data class TopFavoriteProduct(
+        val ids:List<Long>,
+        val category:String
 )
 
 

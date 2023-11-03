@@ -45,23 +45,42 @@ class ProductController(private val productService : ProductService,
         @RequestParam maximumPurchaseQuantity: Int,
         @RequestParam discountRate: Int,
         @RequestParam files: Array<MultipartFile>,
+        @RequestParam mainFile: MultipartFile,
     ): ResponseEntity<RegisterResponse> {
 
         println(authProfile.id)
-        println("productBrand :$productBrand")
-        println("productName : $productName")
-        println("productPrice : $productPrice")
-        println("category : $category")
-        println("isActive : $isActive")
-        println("productDescription : $productDescription")
-        println("이미지 파일: $files")
+
+        println("이미지 파일: $mainFile")
         val dirPath = Paths.get(POST_FILE_PATH)  //경로 생성
         if (!Files.exists(dirPath)) {
             Files.createDirectories(dirPath)
         }   //없으면 파일 생성
-
         val fileList = mutableListOf<Map<String, String?>>() //변경 가능한 리스트 생성
         val uuidList = mutableListOf<String>()
+
+//        메인 이미지 uuid처리 ------------------------------------
+        val mainUuidList = mutableListOf<String>()
+        val mainFileList = mutableListOf<Map<String, String?>>()
+
+        val mainImgUuid = buildString {
+            append(UUID.randomUUID().toString())  // UUID 생성
+            append(".")
+            append(mainFile.originalFilename).split(".").last()
+        }
+        mainUuidList.add(mainImgUuid!!) // 큐로 보낼 보낼 메인 uuid
+        val mainFilePath = dirPath.resolve(mainImgUuid)
+
+        mainFile.inputStream.use { inputStream ->
+            Files.copy(inputStream, mainFilePath, StandardCopyOption.REPLACE_EXISTING)
+        }
+        mainFileList.add(
+            mapOf(
+                "uuidFileName" to mainImgUuid,
+                "contentType" to mainFile.contentType,
+                "originalFileName" to mainFile.originalFilename
+            )
+        )
+//        --------------------------------------------------------------------
         //file처리 로직
         runBlocking { // 코루틴
             files.forEach { // 각각 파일 병렬
@@ -93,7 +112,7 @@ class ProductController(private val productService : ProductService,
                 }
             }
         }
-
+        val combinedList = fileList + mainFileList
 //       데이터베이스 처리 로직
         val result = transaction {
             val p = Product   //인터셉터해서 brand_id insert하기
@@ -110,8 +129,9 @@ class ProductController(private val productService : ProductService,
                 it[this.maximumPurchaseQuantity] = maximumPurchaseQuantity
                 it[this.discountRate] = discountRate
                 it[this.productDescription] = productDescription
+                it[this.mainImageUuidName] = mainImgUuid
             }
-            pf.batchInsert(fileList) {
+            pf.batchInsert(combinedList) {
                 this[pf.productId] = insertProduct[p.id]
                 this[pf.originalFileName] = it["originalFileName"] as String
                 this[pf.uuidFileName] = it["uuidFileName"] as String
@@ -134,6 +154,7 @@ class ProductController(private val productService : ProductService,
                 maximumPurchaseQuantity = maximumPurchaseQuantity,
                 discountRate = discountRate,
                 productDescription = productDescription,
+                mainImageUuidName = mainImgUuid,
                 imageUuidName = uuidList
             )
 
@@ -193,7 +214,7 @@ class ProductController(private val productService : ProductService,
                 val productId = r[p.id]
 
                 // 제품 이미지 DB에서 productID와 일치하는 애들만 추리기
-                val productFiles = pf.select { pf.productId eq productId }.map { r ->
+                val productFiles = (p innerJoin pf).select { (pf.productId eq productId) and (pf.uuidFileName eq p.mainImageUuidName) }.map { r ->
                     ProductFileResponse(
                         id = r[pf.id].value,
                         productId = productId,
@@ -259,6 +280,7 @@ class ProductController(private val productService : ProductService,
                 it[p.productPrice] = req.productPrice.toLong()
                 it[p.maximumPurchaseQuantity] = req.maximumPurchaseQuantity.toInt()
                 it[p.discountRate] = req.discountRate.toInt()
+                it[p.category] = req.category
             }
 
             pi.update({ pi.productId eq id }) {
@@ -269,28 +291,43 @@ class ProductController(private val productService : ProductService,
 
     }
 
-
-    @Auth
     @GetMapping("/topFiveProduct")
-    fun getTopFiveProduct(@RequestAttribute authProfile: AuthProfile) = transaction {
+    fun getTopFiveProduct() = transaction {
         val pto = ProductTotalOrder
-        val p = Product
-        val findUserProduct = p.select { p.brand_id eq authProfile.id }.map { it[p.id] }
 
-        val topFiveByCategoryList = mutableMapOf<String, List<Int>>()
+        val topFiveByCategoryList = mutableListOf<TopFavoriteProduct>()
 
-
-        val topFiveProduct = pto.select { pto.productId inList findUserProduct }
+        val topFiveProduct = pto.selectAll()
             .groupBy { it[pto.category] }
             .map { (category, categoryOrders) ->
                 val topOrders = categoryOrders.sortedByDescending { it[pto.totalOrder] }
                     .take(5)
-                    .map { it[pto.productId].toInt() }
-                category to topOrders
+                    .map { it[pto.productId].toLong() }
+                topFiveByCategoryList.add(TopFavoriteProduct(ids = topOrders, category = category))
             }
 
-        return@transaction topFiveProduct
-
+        return@transaction topFiveByCategoryList
     }
+
+//    @GetMapping("/topFiveProduct")
+//    fun getTopFiveProduct() = transaction {
+//        val pto = ProductTotalOrder
+//        val p = Product
+//
+//        val topFiveByCategoryList = mutableMapOf<String, List<Int>>()
+//
+//
+//        val topFiveProduct = pto.selectAll()
+//            .groupBy { it[pto.category] }
+//            .map { (category, categoryOrders) ->
+//                val topOrders = categoryOrders.sortedByDescending { it[pto.totalOrder] }
+//                    .take(5)
+//                    .map { it[pto.productId].toInt() }
+//                category to topOrders
+//            }
+//
+//        return@transaction topFiveProduct
+//
+//    }
 
 }  // 끝
