@@ -248,6 +248,7 @@ class ProductController(private val productService : ProductService,
         return@transaction response
     }
 
+
     @GetMapping("/files/{uuidFilename}")  //이미지/동영상 요청
     fun downloadFile(@PathVariable uuidFilename: String): ResponseEntity<Any> {
         val file = Paths.get("$POST_FILE_PATH/$uuidFilename").toFile()
@@ -326,25 +327,19 @@ class ProductController(private val productService : ProductService,
         return@transaction topFiveByCategoryList
     }
 
-//    @GetMapping("/topFiveProduct")
-//    fun getTopFiveProduct() = transaction {
-//        val pto = ProductTotalOrder
-//        val p = Product
-//
-//        val topFiveByCategoryList = mutableMapOf<String, List<Int>>()
-//
-//
-//        val topFiveProduct = pto.selectAll()
-//            .groupBy { it[pto.category] }
-//            .map { (category, categoryOrders) ->
-//                val topOrders = categoryOrders.sortedByDescending { it[pto.totalOrder] }
-//                    .take(5)
-//                    .map { it[pto.productId].toInt() }
-//                category to topOrders
-//            }
-//
-//        return@transaction topFiveProduct
-//
-//    }
+ @Auth
+ @GetMapping("lessQuantity")
+ fun  getLessQuantity(@RequestAttribute authProfile: AuthProfile) = transaction{
+     val p = Product
+     val pi = ProductInventory
+     val findProduct = p.select { p.brand_id eq authProfile.id }.map { it[p.id] }
+     val lessQuantityProduct =  findProduct.map { productId ->
+         pi.select { pi.productId eq productId }.andWhere { pi.quantity less 4 }.map {
+             it[pi.productId]
+         }
+     }
+     println("check-----------------------$lessQuantityProduct")
+     return@transaction lessQuantityProduct
+ }
 
 }  // 끝
