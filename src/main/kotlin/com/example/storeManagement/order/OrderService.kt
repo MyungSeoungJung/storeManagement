@@ -76,7 +76,7 @@ class OrderService(private val rabbitTemplate: RabbitTemplate) {
                  }
              } else {
                  // 주문 통계가 없는 경우 새 레코드 생성
-                 ProductTotalOrder.insert {g
+                 ProductTotalOrder.insert {
                      it[this.productId] = orderRequest.productId
                      it[this.category] = findProductCategory.toString()
                      it[this.totalOrder] = orderRequest.quantity.toLong()
