@@ -5,16 +5,17 @@ import com.example.storeManagement.auth.AuthProfile
 import com.example.storeManagement.order.OrderTable
 import com.example.storeManagement.product.Product
 import org.jetbrains.exposed.sql.andWhere
+import org.jetbrains.exposed.sql.javatime.month
 import org.jetbrains.exposed.sql.javatime.year
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
-import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestAttribute
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import java.time.Month
+import java.time.YearMonth
+
 @RestController
 @RequestMapping("/chart")
 class ChartController {
@@ -158,5 +159,58 @@ class ChartController {
     }
 
 
+    @Auth
+    @GetMapping("/settlementMoney")
+    fun getMonthlySales(@RequestAttribute authProfile: AuthProfile): MonthlySales = transaction {
+        val p = Product
+        val o = OrderTable
+        val currentYearMonth = YearMonth.now() // 현재 연도와 월
+        val lastMonthYearMonth = currentYearMonth.minusMonths(1) // 이전 달 연도와 월
+        val thisMonthSales = mutableListOf<Int>()
+        val lastMonthSales = mutableListOf<Int>()
 
+        val findUserProduct = p.select { p.brand_id eq authProfile.id }.map { it[p.id] }
+        val productJoinOrder = (p innerJoin o)
+
+        findUserProduct.forEach { productId ->
+            val thisMonthOrderProductQuantity = productJoinOrder.select { o.productId eq productId }
+                .andWhere { o.orderDate.year() eq currentYearMonth.year }
+                .andWhere { o.orderDate.month() eq currentYearMonth.monthValue }
+                .map { it }  // 이번 달 주문 정보 뽑기
+
+            val lastMonthOrderProductQuantity = productJoinOrder.select { o.productId eq productId }
+                .andWhere { o.orderDate.year() eq lastMonthYearMonth.year }
+                .andWhere { o.orderDate.month() eq lastMonthYearMonth.monthValue }
+                .map { it }  // 저번 달 주문 정보 뽑기
+
+            thisMonthOrderProductQuantity.forEach { order ->
+                val productPrice = productJoinOrder.select { p.id eq order[o.productId] }
+                    .map { it[p.productPrice].toInt() }
+                    .firstOrNull()
+
+                if (productPrice != null) {
+                    val orderQuantity = order[o.quantity]
+                    // 이번 달 매출 정보를 누적
+                    thisMonthSales.add(productPrice * orderQuantity)
+                }
+            }
+
+            lastMonthOrderProductQuantity.forEach { order ->
+                val productPrice = productJoinOrder.select { p.id eq order[o.productId] }
+                    .map { it[p.productPrice].toInt() }
+                    .firstOrNull()
+
+                if (productPrice != null) {
+                    val orderQuantity = order[o.quantity]
+                    // 저번 달 매출 정보를 누적
+                    lastMonthSales.add(productPrice * orderQuantity)
+                }
+            }
+        }
+
+        val thisMonthTotalSales = thisMonthSales.sum()
+        val lastMonthTotalSales = lastMonthSales.sum()
+
+        return@transaction MonthlySales(thisMonthTotalSales, lastMonthTotalSales)
+    }
 } // 끝

@@ -5,3 +5,6 @@ data class MonthlyChartData(
     val data: List<Int>,
 )
 
+data class MonthlySales(val thisMonth: Int, val lastMonth: Int)
+
+

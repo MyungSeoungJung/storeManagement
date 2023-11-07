@@ -54,7 +54,7 @@ data class ModifyProduct (
         val category: String,
 )
 data class TopFavoriteProduct(
-        val ids:List<Long>,
+        val id:List<Long>,
         val category:String
 )
 

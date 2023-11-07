@@ -265,6 +265,7 @@ class ProductController(private val productService : ProductService,
             .body(resource)
     }
 
+    @Auth
     @PutMapping("/modifyProduct")
     fun modifyInventory(
         @RequestParam id: Long,
@@ -304,7 +305,6 @@ class ProductController(private val productService : ProductService,
 
         productService.createProductMessage(productModifyMessageRequest)
         }
-
     }
 
     @GetMapping("/topFiveProduct")
@@ -315,17 +315,18 @@ class ProductController(private val productService : ProductService,
 
         val pInnerJoinOrder = (Product innerJoin OrderTable)
 
-        val topFiveProduct = pInnerJoinOrder.selectAll()
+        val topFiveProduct = pto.selectAll()
             .groupBy { it[pto.category] }
             .map { (category, categoryOrders) ->
                 val topOrders = categoryOrders.sortedByDescending { it[pto.totalOrder] }
                     .take(5)
                     .map { it[pto.productId].toLong() }
-                topFiveByCategoryList.add(TopFavoriteProduct(ids = topOrders, category = category))
+                topFiveByCategoryList.add(TopFavoriteProduct(id = topOrders, category = category))
             }
         println(topFiveProduct)
         return@transaction topFiveByCategoryList
     }
+
 
  @Auth
  @GetMapping("lessQuantity")
