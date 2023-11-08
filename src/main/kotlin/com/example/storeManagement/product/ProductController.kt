@@ -321,26 +321,32 @@ class ProductController(private val productService : ProductService,
                 val topOrders = categoryOrders.sortedByDescending { it[pto.totalOrder] }
                     .take(5)
                     .map { it[pto.productId].toLong() }
-                topFiveByCategoryList.add(TopFavoriteProduct(id = topOrders, category = category))
+                topFiveByCategoryList.add(TopFavoriteProduct(ids = topOrders, category = category))
             }
         println(topFiveProduct)
         return@transaction topFiveByCategoryList
     }
 
 
- @Auth
- @GetMapping("lessQuantity")
- fun  getLessQuantity(@RequestAttribute authProfile: AuthProfile) = transaction{
-     val p = Product
-     val pi = ProductInventory
-     val findProduct = p.select { p.brand_id eq authProfile.id }.map { it[p.id] }
-     val lessQuantityProduct =  findProduct.map { productId ->
-         pi.select { pi.productId eq productId }.andWhere { pi.quantity less 4 }.map {
-             it[pi.productId]
-         }
-     }
-     println("check-----------------------$lessQuantityProduct")
-     return@transaction lessQuantityProduct
- }
+    @Auth
+    @GetMapping("lessQuantity")
+    fun getLessQuantity(@RequestAttribute authProfile: AuthProfile): List<Pair<String, Int>> = transaction{
+        val p = Product
+        val pi = ProductInventory
+        val findProduct = p.select { p.brand_id eq authProfile.id }.map { it[p.id] }
+
+        val lessQuantityProducts = findProduct.flatMap { productId ->
+            pi.select { (pi.productId eq productId) and (pi.quantity less 4) }.map {
+                Pair(
+                    p.select { p.id eq productId }.single()[p.productName],
+                    it[pi.quantity]
+                )
+            }
+        }
+
+        println("check-----------------------$lessQuantityProducts")
+        return@transaction lessQuantityProducts
+    }
+
 
 }  // 끝

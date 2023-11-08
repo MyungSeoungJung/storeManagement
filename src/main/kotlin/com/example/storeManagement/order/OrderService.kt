@@ -115,12 +115,15 @@ class OrderService(private val rabbitTemplate: RabbitTemplate) {
                        println("falseOrderRequest----------------------------$falseOrderRequest")
                        sendResultMessage(falseOrderRequest)
 
+
                    }
 
                }
            }
 
     }
+
+
 
     fun sendResultMessage(orderResultResponse: OrderResultResponse){
         rabbitTemplate.convertAndSend("product-payment-result",mapper.writeValueAsString(orderResultResponse))

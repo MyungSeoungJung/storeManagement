@@ -12,6 +12,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter
 import java.sql.Connection
 
 
@@ -99,4 +100,10 @@ class OrderController (private val orderService: OrderService) {
             return@transaction PageImpl(result, PageRequest.of(page, size), totalCount)
         }
     }
+
+//    @GetMapping("/notifications")
+//    fun streamNotification(): SseEmitter {
+//
+//        return null;
+//    }
 }
