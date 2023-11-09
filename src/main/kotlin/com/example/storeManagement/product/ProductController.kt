@@ -201,7 +201,13 @@ class ProductController(private val productService : ProductService,
         val searchProduct = if (keyword.isNullOrBlank()) {
             stateProducts
         } else {
-            stateProducts.andWhere { p.productName like "%$keyword%" }
+            stateProducts.andWhere {
+                if (keyword.matches(Regex("\\d+"))) {
+                    p.id eq keyword.toLong()
+                } else {
+                    p.productName like "%$keyword%"
+                }
+            }
         }
 
         val totalCount = searchProduct.count()
