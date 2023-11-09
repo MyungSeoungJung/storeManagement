@@ -115,6 +115,8 @@ class OrderService(private val rabbitTemplate: RabbitTemplate) {
                        println("falseOrderRequest----------------------------$falseOrderRequest")
                        sendResultMessage(falseOrderRequest)
 
+//               ----------------
+
 
                    }
 
@@ -122,7 +124,20 @@ class OrderService(private val rabbitTemplate: RabbitTemplate) {
            }
 
     }
+    fun createEmitter(): SseEmitter {
+        val emitter = SseEmitter()
+        emitters.add(emitter)
 
+        emitter.onTimeout {
+            emitters.remove(emitter)
+        }
+
+        emitter.onCompletion {
+            emitters.remove(emitter)
+        }
+        emitter.send("connected");  //기본메세지를 안 보내면 panding 처리 됨
+        return emitter
+    }
 
 
     fun sendResultMessage(orderResultResponse: OrderResultResponse){

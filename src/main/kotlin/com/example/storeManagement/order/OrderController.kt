@@ -101,9 +101,9 @@ class OrderController (private val orderService: OrderService) {
         }
     }
 
-//    @GetMapping("/notifications")
-//    fun streamNotification(): SseEmitter {
-//
-//        return null;
-//    }
+
+    @GetMapping("/notifications")
+    fun streamNotification(): SseEmitter {
+        return orderService.createEmitter()
+    }
 }
