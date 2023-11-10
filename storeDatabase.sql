@@ -21,7 +21,39 @@ INNER JOIN product ON order_table.product_id = product.id;
 SELECT *
 FROM product_total_order
 INNER JOIN product ON product_total_order.product_id = product.id;
--- 
+
+-- 총 주문 내역 더미 데이터
+INSERT INTO product_total_order (product_id, category, total_order)
+VALUES
+    (1, 'tent', 42),
+    (2, 'tent', 65),
+    (3, 'tent', 45),
+    (4, 'tent', 86),
+    (5, 'tent', 15),
+    (6, 'table', 68),
+    (7, 'table', 71),
+    (8, 'table', 20),
+    (9, 'table', 23),
+    (10, 'table', 68),
+    (11, 'tableware', 97),
+    (12, 'tableware', 12),
+    (13, 'tableware', 51),
+    (14, 'tableware', 58),
+    (18, 'tableware', 67),
+    (15, 'accessory', 24),
+    (16, 'accessory', 43),
+    (17, 'accessory', 28),
+    (19, 'accessory', 78),
+    (20, 'accessory', 95),
+    (21, 'other', 31),
+    (22, 'other', 35),
+    (23, 'other', 53),
+    (24, 'other', 27),
+    (25, 'other', 19);
+    
+    
+
+-- 그래프 더미 데이터
 INSERT INTO order_table (order_id, user_id, product_id, order_quantity, address, order_date, order_status)
 VALUES
 (1, 1, FLOOR(RAND() * 26) + 1, 51, '주소1', '2021-01-15 12:30:00', 1),

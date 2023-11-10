@@ -68,6 +68,14 @@ class OrderService(private val rabbitTemplate: RabbitTemplate) {
                        // 재고수량 - 주문 수량 빼기 DB업데이트문
                        val newQuantity = currentQuantity - orderRequest.quantity  // 현재 수량 - 주문 수량
 
+                       // 주문이 들어온 후에 재고가 0이 되었을 때 상품을 숨김 처리
+                       if (newQuantity == 0) {
+                           val p = Product
+                           p.update({ p.id eq orderRequest.productId }) {
+                               it[p.isActive] = false
+                           }
+                       }
+
                        pi.update ({pi.productId eq orderRequest.productId}) {
                            it[quantity] = newQuantity
                        }
