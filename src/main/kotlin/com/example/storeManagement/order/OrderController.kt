@@ -8,12 +8,15 @@ import com.example.storeManagement.auth.AuthProfile
 import com.example.storeManagement.product.Product
 import com.example.storeManagement.product.ProductFiles
 import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.javatime.month
+import org.jetbrains.exposed.sql.javatime.year
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter
 import java.sql.Connection
+import java.time.YearMonth
 
 
 @RestController
@@ -105,5 +108,38 @@ class OrderController (private val orderService: OrderService) {
     @GetMapping("/notifications")
     fun streamNotification(): SseEmitter {
         return orderService.createEmitter()
+    }
+    @Auth
+    @GetMapping("/orderProcessingStatus")
+    fun orderProcessingStaus (@RequestAttribute authProfile: AuthProfile) = transaction {
+        val p = Product
+        val o = OrderTable
+
+        // 이번 달의 시작과 끝 날짜 계산
+        val currentYearMonth = YearMonth.now()
+
+        // 해당 브랜드의 모든 제품 ID 가져오기
+        val productIds = p.select { p.brand_id eq authProfile.id }.map { it[p.id] }
+
+        // 주문 성공 및 주문 실패 갯수 계산
+        val successOrderCount = o.select {
+            (o.productId inList productIds) and
+                    (o.orderDate.year() eq currentYearMonth.year) and
+                    (o.orderDate.month() eq currentYearMonth.monthValue) and
+                    (o.orderStatus eq true)
+        }.count()
+
+        val failureOrderCount = o.select {
+            (o.productId inList productIds) and
+                    (o.orderDate.year() eq currentYearMonth.year) and
+                    (o.orderDate.month() eq currentYearMonth.monthValue) and
+                    (o.orderStatus eq false)
+        }.count()
+        // 응답 구성
+
+        return@transaction mapOf<String, Long>(
+            "successOrderCount" to successOrderCount,
+            "failureOrderCount" to failureOrderCount
+        )
     }
 }

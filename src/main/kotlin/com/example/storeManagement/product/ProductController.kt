@@ -354,5 +354,22 @@ class ProductController(private val productService : ProductService,
         return@transaction lessQuantityProducts
     }
 
+    @Auth
+    @GetMapping("currentProductState")
+    fun currentProductState(@RequestAttribute authProfile: AuthProfile)= transaction{
+        val p = Product
+        val productIds = p.select { p.brand_id eq authProfile.id }.map { it[p.id] }
+
+            val productIsActiveTrue = p.select { p.id inList  productIds }.andWhere { p.isActive eq true }.count()
+            val productIsActiveFalse = p.select { p.id inList productIds }.andWhere { p.isActive eq false }.count()
+            val productDisCountActive =  p.select { p.id inList productIds }.andWhere { p.discountRate greater 0 }.count()
+
+        return@transaction mapOf<String, Long>(
+            "ProductIsActiveTrue" to productIsActiveTrue,
+            "ProductIsActiveFalse" to productIsActiveFalse,
+            "ProductDisCountActive" to productDisCountActive,
+        )
+
+    }
 
 }  // 끝
