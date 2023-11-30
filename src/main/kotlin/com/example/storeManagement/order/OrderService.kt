@@ -28,8 +28,10 @@ class OrderService(private val rabbitTemplate: RabbitTemplate) {
 
     private val emitters = mutableListOf<SseEmitter>()
     @Auth
-    @RabbitListener(queues = ["product-payment"]) // queue 읽고 주문내역 테이블에 저장
+    @RabbitListener(queues = ["product-payment"])
+//    product-payment에 있는 queue receiveOrder(message : String) 매개변수로 전달
     fun receiveOrder(message : String){
+//      JSON 문자열(message)을 OrderRequest 클래스의 인스턴스로 변환
         val orderRequest : OrderRequest = mapper.readValue(message)
 
         val deadEmitters : MutableList<SseEmitter> = ArrayList()
@@ -104,15 +106,15 @@ class OrderService(private val rabbitTemplate: RabbitTemplate) {
                                it[this.totalOrder] = orderRequest.quantity.toLong()
                            }
                        }
-                       // 주문 통계 update 구문 ------------------------------------------------------------------------------------------------------------
+                       // 주문 통계 update 구문
                        // 성공 메세지 보내기
                        val successOrderRequest = OrderResultResponse(
                            orderId = orderRequest.orderId,
                            isPermission = "true"
                        )
-                       println("successOrderRequest----------------------------$successOrderRequest")
+                       println("successOrderRequest---------------------------$successOrderRequest")
                        sendResultMessage(successOrderRequest)
-                   } else if (findProduct.empty() || currentQuantity == 0 || orderRequest.quantity == 0 ||  orderRequest.quantity > currentQuantity){  //추가
+                   } else if (findProduct.empty() || currentQuantity == 0 || orderRequest.quantity == 0 ||  orderRequest.quantity > currentQuantity){
                        val falseOrderRequest = OrderResultResponse (
                            orderId = orderRequest.orderId,
                            isPermission = "false"
@@ -123,7 +125,6 @@ class OrderService(private val rabbitTemplate: RabbitTemplate) {
                        println("falseOrderRequest----------------------------$falseOrderRequest")
                        sendResultMessage(falseOrderRequest)
 
-//               ----------------
 
 
                    }
@@ -143,7 +144,7 @@ class OrderService(private val rabbitTemplate: RabbitTemplate) {
         emitter.onCompletion {
             emitters.remove(emitter)
         }
-        emitter.send("connected");  //기본메세지를 안 보내면 panding 처리 됨
+        emitter.send("connected");  //기본메세지를 안 보내면 pending 처리 됨
         return emitter
     }
 

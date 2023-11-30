@@ -97,7 +97,7 @@ class OrderController (private val orderService: OrderService) {
                             orderDate = r[o.orderDate].toString(),
                             orderState = r[o.orderStatus],
                             productInfo = productInfoAndFile
-                        ) //orderStateAndInfo값이 있다면
+                        )
 
                 }
             return@transaction PageImpl(result, PageRequest.of(page, size), totalCount)

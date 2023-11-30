@@ -38,4 +38,6 @@ out/
 files\
 productImg\
 
+## application-dev.properties
+application-dev.properties
 

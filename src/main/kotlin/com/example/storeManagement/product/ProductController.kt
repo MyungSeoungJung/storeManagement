@@ -143,7 +143,7 @@ class ProductController(private val productService : ProductService,
                 it[lastUpdated] = LocalDateTime.now()
             }
 
-            // queue 전송 로직
+            // queue 전송 객체
             val productMessageRequest = ProductMessageRequest(
                 id = insertProduct[p.id],
                 productBrand = productBrand,

@@ -1,0 +1,35 @@
+#컴포즈 파일은 새로 빌드 할 필요 없음
+version: "3"
+#서비스 정의 영역
+services:
+  # 서비스명을 기본 호스트네임으로 잡는다. hostname: redis
+  redis:
+    image: "redis:latest"
+    ports:
+      - "6379:6379" # Redis의 기본 포트입니다.
+    networks:
+      - my-network
+  app:
+    image: "myungsj/storemanagement" # 여기에 Spring Boot 도커 이미지 이름을 사용하세요.
+    ports:
+      - "8080:8080" # 호스트의 포트를 컨테이너의 포트에 매핑합니다.
+    networks:
+      - my-network
+#      먼저 실행되어야할 서비스(컨테이너) 목록
+    volumes:
+     - my-volume:/tmp
+     # 우분투 리눅스 볼륨위치
+       # /var/lib/docker/volumes
+       # 윈도우즈 볼륨위치
+      # \\wsl$\docker-desktop-data\data\docker\volumes
+    depends_on:
+      - redis
+#      서비스 실행할때 사용할 환경 변수(컨테이너에서 사용할 변수)
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+# 네트워크 정의 영역
+networks:
+  my-network:
+    driver: bridge
+volumes:
+  my-volume:

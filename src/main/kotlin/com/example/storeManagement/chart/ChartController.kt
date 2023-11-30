@@ -54,7 +54,7 @@ class ChartController {
                         val month = orderDate.monthValue   // 순회중인 주문의 월
                         val orderQuantity = order[o.quantity] // 순회중인 주문의 수량
 
-                        categoryTotalMap  //순회중인 카테고리 ex 텐트면 텐트에 orderQuantity 추가
+                        categoryTotalMap  //순회중인 카테고리 ex: 텐트면 텐트에 orderQuantity 추가
                             .getOrPut(productCategory) { MutableList(12) { 0 } }
                      // set 사용해서 내가 원하는 인덱스에 값 설정  ex : month 값이 11월이라면 -1 해서 10번째 인덱스에 값 설정
                             .set(month - 1, categoryTotalMap[productCategory]!![month - 1] + orderQuantity)

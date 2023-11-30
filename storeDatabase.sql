@@ -54,8 +54,7 @@ VALUES
     
 
 -- 그래프 더미 데이터
-INSERT INTO order_table (order_id, user_id, product_id, order_quantity, address, order_date, order_status)
-VALUES
+INSERT INTO order_table (order_id, user_id, product_id, order_quantity, address, order_date, order_status)VALUES
 (1, 1, FLOOR(RAND() * 26) + 1, 51, '주소1', '2021-01-15 12:30:00', 1),
 (2, 2, FLOOR(RAND() * 26) + 1, 3, '주소2', '2021-02-20 14:45:00', 1),
 (3, 3, FLOOR(RAND() * 26) + 1, 23, '주소3', '2021-03-10 08:15:00', 1),
