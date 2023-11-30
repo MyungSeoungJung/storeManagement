@@ -12,7 +12,7 @@ services:
   app:
     image: "myungsj/storemanagement" # 여기에 Spring Boot 도커 이미지 이름을 사용하세요.
     ports:
-      - "8080:8080" # 호스트의 포트를 컨테이너의 포트에 매핑합니다.
+      - "8081:8081" # 호스트의 포트를 컨테이너의 포트에 매핑합니다.
     networks:
       - my-network
 #      먼저 실행되어야할 서비스(컨테이너) 목록

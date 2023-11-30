@@ -2,22 +2,19 @@ package com.example.storeManagement.order
 
 import OrderRequest
 import OrderResultResponse
-import com.example.storeManagement.auth.Auth
-import com.example.storeManagement.auth.AuthProfile
+
 import com.example.storeManagement.product.Product
 import com.example.storeManagement.product.ProductInventory
 import com.example.storeManagement.product.ProductTotalOrder
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.example.storeManagement.auth.Auth
 import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.minus
+
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.amqp.rabbit.annotation.RabbitListener
 import org.springframework.amqp.rabbit.core.RabbitTemplate
-import org.springframework.data.relational.core.sql.Update
 import org.springframework.stereotype.Service
-import org.springframework.web.bind.annotation.RequestAttribute
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter
 import java.io.IOException
 import java.time.LocalDateTime

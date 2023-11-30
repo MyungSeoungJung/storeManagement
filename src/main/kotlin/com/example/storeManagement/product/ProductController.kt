@@ -1,15 +1,11 @@
 package com.example.storeManagement.product
 
-import com.example.storeManagement.auth.Auth
 import com.example.storeManagement.auth.AuthProfile
 import com.example.storeManagement.order.OrderTable
-import com.example.storeManagement.product.Product.category
-import com.example.storeManagement.product.Product.maximumPurchaseQuantity
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.example.storeManagement.auth.Auth
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.core.io.ResourceLoader
 import org.springframework.data.domain.PageImpl
@@ -24,7 +20,6 @@ import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 import java.time.LocalDateTime
 import java.util.*
-import kotlin.collections.ArrayList
 
 @RestController
 @RequestMapping("/product")
