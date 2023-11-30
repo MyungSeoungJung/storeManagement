@@ -25,7 +25,8 @@ class WebMvcConfig(val authInterceptor: AuthInterceptor) : WebMvcConfigurer {
                         "http://localhost:5000",
                         "http://192.168.0.88:8080",
                         "http://192.168.100.151:8080",
-                        "http://192.168.100.152:5000"
+                    "http://192.168.100.151:5000",
+                    "http://192.168.100.152:5000"
 
 
                 ) // 로컬 호스트 origin 허용

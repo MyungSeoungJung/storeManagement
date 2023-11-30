@@ -2,6 +2,7 @@ package com.example.storeManagement.auth
 
 import org.springframework.web.multipart.MultipartFile
 
+// 로그인 구현 담당 팀원이 배포 단계중 수업 불참하여 부득이하게 코드 복사 하였습니다.
 data class AuthProfile (
     val id: Long, // 프로필 id
     val username: String, // 로그인 사용자이름
