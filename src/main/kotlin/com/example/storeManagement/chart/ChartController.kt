@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController
 import java.time.YearMonth
 
 @RestController
-@RequestMapping("/chart")
+@RequestMapping("/api/chart")
 class ChartController {
 
     @Auth

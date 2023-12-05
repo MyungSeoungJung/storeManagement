@@ -20,7 +20,7 @@ import java.time.YearMonth
 
 
 @RestController
-@RequestMapping("/order")
+@RequestMapping("/api/order")
 class OrderController (private val orderService: OrderService) {
 
     @Auth

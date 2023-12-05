@@ -22,7 +22,7 @@ import java.time.LocalDateTime
 import java.util.*
 
 @RestController
-@RequestMapping("/product")
+@RequestMapping("/api/product")
 class ProductController(private val productService : ProductService,
                         private val resourceLoader: ResourceLoader) {
     private val POST_FILE_PATH = "files/productImg";
@@ -366,5 +366,4 @@ class ProductController(private val productService : ProductService,
         )
 
     }
-
 }  // 끝
